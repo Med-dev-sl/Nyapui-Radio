@@ -11,7 +11,9 @@ async function migrate() {
   }
 
   // Parse URL manually
-  const cleaned = dbUrl.replace(/^mysql:/, "").replace(/\?ssl-mode=REQUIRED/, "");
+  let cleaned = dbUrl;
+  if (cleaned.startsWith("mysql:mysql://")) cleaned = cleaned.replace("mysql:mysql://", "mysql://");
+  cleaned = cleaned.replace(/\?ssl-mode=REQUIRED/, "");
   const url = new URL(cleaned);
 
   console.log("Connecting to:", url.host);
@@ -22,7 +24,7 @@ async function migrate() {
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
     database: url.pathname.replace(/^\//, ""),
-    ssl: {},
+    ssl: { rejectUnauthorized: false },
   });
 
   console.log("Connected.\n");
