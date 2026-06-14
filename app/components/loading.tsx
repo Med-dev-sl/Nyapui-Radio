@@ -5,13 +5,19 @@ import { useRouter } from "next/navigation";
 import Lottie from "lottie-react";
 import dualBall from "@/public/Dual Ball@1x-1.0s-200px-200px.json";
 
-export default function Loading() {
+type LoadingProps = {
+  redirectTo?: string;
+  delay?: number;
+};
+
+export default function Loading({ redirectTo, delay }: LoadingProps) {
   const router = useRouter();
 
   useEffect(() => {
-    const timer = setTimeout(() => router.push("/login"), 3500);
+    if (!redirectTo) return;
+    const timer = setTimeout(() => router.push(redirectTo), delay ?? 3500);
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [router, redirectTo, delay]);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">

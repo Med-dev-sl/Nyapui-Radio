@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Logo from "@/app/components/logo";
+import Loading from "@/app/components/loading";
 
 export default function Login() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -25,11 +26,13 @@ export default function Login() {
 
     if (!res.ok) {
       setError(data.error);
+      setLoading(false);
       return;
     }
 
-    router.push("/dashboard");
   }
+
+  if (loading) return <Loading redirectTo="/admin/dashboard" delay={2000} />;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6">
