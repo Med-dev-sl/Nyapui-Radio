@@ -34,7 +34,9 @@ export default function Login() {
       return;
     }
 
-    setLoggedUser(data.user?.full_name || username);
+    const user = data.user;
+    setLoggedUser(user?.full_name || username);
+    localStorage.setItem("nyapui_user", JSON.stringify(user));
     setShowSuccess(true);
     setTimeout(() => router.push("/admin/dashboard"), 2000);
   }
