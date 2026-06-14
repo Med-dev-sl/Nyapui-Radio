@@ -1,9 +1,9 @@
-import { sql } from "@/lib/db";
+import { db } from "@/lib/db";
 
 export async function GET() {
   try {
-    const result = await sql`SELECT NOW()`;
-    return Response.json({ status: "ok", time: result[0].now });
+    const [rows] = await db.execute("SELECT 1 AS ok");
+    return Response.json({ status: "ok", db: rows });
   } catch (e) {
     return Response.json({ status: "error", message: String(e) }, { status: 500 });
   }
