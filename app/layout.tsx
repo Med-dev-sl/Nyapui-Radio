@@ -27,6 +27,8 @@ const notoSans = localFont({
 
 export const metadata: Metadata = {
   title: "Nyapui Radio",
+  description: "Nyapui Radio – streaming platform",
+  robots: "index, follow",
 };
 
 export default function RootLayout({
