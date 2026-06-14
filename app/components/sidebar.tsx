@@ -4,7 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const links = [
+type SidebarLink = {
+  label: string;
+  icon: string;
+  href?: string;
+  children?: { label: string; href: string }[];
+};
+
+const links: SidebarLink[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
   {
     label: "Users",
@@ -34,7 +41,7 @@ export default function Sidebar() {
     <aside className="w-64 bg-white border-r border-zinc-200 min-h-screen flex flex-col py-4 shadow-sm">
       <nav className="flex flex-col gap-1 px-3">
         {links.map((link, i) => {
-          if ("children" in link) {
+          if (link.children) {
             return (
               <div key={link.label} className="animate-fade-slide-in" style={{ animationDelay: `${i * 0.05}s` }}>
                 <button
