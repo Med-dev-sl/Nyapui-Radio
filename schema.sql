@@ -79,3 +79,37 @@ CREATE TABLE live_comments (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (live_id) REFERENCES facebook_lives(id) ON DELETE CASCADE
 );
+
+CREATE TABLE program_schedules (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  photo_url VARCHAR(500) DEFAULT '',
+  scheduled_at DATETIME NOT NULL,
+  topic TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE schedule_guests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  schedule_id INT NOT NULL,
+  guest_id INT NOT NULL,
+  FOREIGN KEY (schedule_id) REFERENCES program_schedules(id) ON DELETE CASCADE,
+  FOREIGN KEY (guest_id) REFERENCES guests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE schedule_presenters (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  schedule_id INT NOT NULL,
+  presenter_id INT NOT NULL,
+  FOREIGN KEY (schedule_id) REFERENCES program_schedules(id) ON DELETE CASCADE,
+  FOREIGN KEY (presenter_id) REFERENCES presenters(id) ON DELETE CASCADE
+);
+
+CREATE TABLE schedule_reminders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  schedule_id INT NOT NULL,
+  session_id VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (schedule_id) REFERENCES program_schedules(id) ON DELETE CASCADE
+);
