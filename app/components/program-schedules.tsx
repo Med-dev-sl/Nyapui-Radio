@@ -164,6 +164,29 @@ export default function ProgramSchedulesUI() {
     setShowModal(true);
   }
 
+  async function compressImage(file: File, maxDim = 1200, quality = 0.8): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (w > maxDim || h > maxDim) {
+          const ratio = Math.min(maxDim / w, maxDim / h);
+          w = Math.round(w * ratio); h = Math.round(h * ratio);
+        }
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+        c.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Compression failed"));
+        }, "image/jpeg", quality);
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -172,14 +195,24 @@ export default function ProgramSchedulesUI() {
     setLocalPreview(objectUrl);
 
     setUploading(true);
-    const fd = new FormData();
-    fd.append("photo", file);
-    const res = await fetch("/api/upload/photo", { method: "POST", body: fd });
-    if (!res.ok) { show("Photo upload failed", false); setUploading(false); return; }
-    const data = await res.json();
-    setForm({ ...form, photo_url: data.url });
+    try {
+      const compressed = await compressImage(file);
+      const fd = new FormData();
+      fd.append("photo", compressed, file.name.replace(/\.[^.]+$/, ".jpg"));
+      const res = await fetch("/api/upload/photo", { method: "POST", body: fd });
+      if (!res.ok) {
+        const text = await res.text();
+        show(text ? `Upload failed (${res.status})` : `Upload failed (${res.status})`, false);
+        setUploading(false);
+        return;
+      }
+      const data = await res.json();
+      setForm({ ...form, photo_url: data.url });
+      show("Photo uploaded", true);
+    } catch (err: any) {
+      show(err.message || "Upload failed", false);
+    }
     setUploading(false);
-    show("Photo uploaded", true);
   }
 
   async function handleSubmit(e: FormEvent) {
