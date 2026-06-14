@@ -10,8 +10,12 @@ async function migrate() {
     process.exit(1);
   }
 
-  // Strip ssl-mode from query string (mysql2 doesn't support it)
-  const cleanUrl = dbUrl.replace(/\?ssl-mode=REQUIRED/, "");
+  // Fix duplicate prefix and strip ssl-mode (mysql2 doesn't support it)
+  let cleanUrl = dbUrl.replace(/^mysql:/, ""); // remove accidental mysql: prefix
+  if (!cleanUrl.startsWith("mysql://")) cleanUrl = "mysql://" + cleanUrl;
+  cleanUrl = cleanUrl.replace(/\?ssl-mode=REQUIRED/, "");
+  console.log("Connecting to:", cleanUrl.replace(/\/\/.*@/, "//***@"));
+
   const connection = await mysql.createConnection({
     uri: cleanUrl,
     ssl: {},
