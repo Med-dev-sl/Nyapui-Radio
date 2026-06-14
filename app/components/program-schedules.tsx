@@ -164,7 +164,7 @@ export default function ProgramSchedulesUI() {
     setShowModal(true);
   }
 
-  async function compressImage(file: File, maxDim = 1200, quality = 0.8): Promise<Blob> {
+  async function compressImage(file: File, maxDim = 1200, quality = 0.8): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -177,10 +177,7 @@ export default function ProgramSchedulesUI() {
         c.width = w; c.height = h;
         const ctx = c.getContext("2d")!;
         ctx.drawImage(img, 0, 0, w, h);
-        c.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error("Compression failed"));
-        }, "image/jpeg", quality);
+        resolve(c.toDataURL("image/jpeg", quality));
       };
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = URL.createObjectURL(file);
@@ -196,21 +193,11 @@ export default function ProgramSchedulesUI() {
 
     setUploading(true);
     try {
-      const compressed = await compressImage(file);
-      const fd = new FormData();
-      fd.append("photo", compressed, file.name.replace(/\.[^.]+$/, ".jpg"));
-      const res = await fetch("/api/upload/photo", { method: "POST", body: fd });
-      if (!res.ok) {
-        const text = await res.text();
-        show(text ? `Upload failed (${res.status})` : `Upload failed (${res.status})`, false);
-        setUploading(false);
-        return;
-      }
-      const data = await res.json();
-      setForm({ ...form, photo_url: data.url });
-      show("Photo uploaded", true);
+      const dataUrl = await compressImage(file);
+      setForm({ ...form, photo_url: dataUrl });
+      show("Photo added", true);
     } catch (err: any) {
-      show(err.message || "Upload failed", false);
+      show(err.message || "Failed to process photo", false);
     }
     setUploading(false);
   }
