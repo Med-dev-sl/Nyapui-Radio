@@ -10,7 +10,13 @@ async function migrate() {
     process.exit(1);
   }
 
-  const connection = await mysql.createConnection(dbUrl);
+  // Strip ssl-mode from query string (mysql2 doesn't support it)
+  const cleanUrl = dbUrl.replace(/\?ssl-mode=REQUIRED/, "");
+  const connection = await mysql.createConnection({
+    uri: cleanUrl,
+    ssl: {},
+  });
+
   const sql = fs.readFileSync(
     path.join(__dirname, "..", "schema.sql"),
     "utf-8"
@@ -31,6 +37,6 @@ async function migrate() {
 }
 
 migrate().catch((err) => {
-  console.error("Migration failed:", err.message);
+  console.error("Migration failed:", err);
   process.exit(1);
 });
