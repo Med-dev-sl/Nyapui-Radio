@@ -5,6 +5,7 @@ import { useEffect, useState, FormEvent } from "react";
 type FacebookLive = {
   id: number;
   facebook_url: string;
+  topic: string;
   guest_name: string;
   guest_position: string;
   guest_institution: string;
@@ -30,6 +31,7 @@ export default function FacebookLiveAdmin() {
 
   const [form, setForm] = useState({
     facebook_url: "",
+    topic: "",
     guest_name: "",
     guest_position: "",
     guest_institution: "",
@@ -94,7 +96,7 @@ export default function FacebookLiveAdmin() {
 
   function openCreate() {
     setEditing(null);
-    setForm({ facebook_url: "", guest_name: "", guest_position: "", guest_institution: "", presenter_name: "" });
+    setForm({ facebook_url: "", topic: "", guest_name: "", guest_position: "", guest_institution: "", presenter_name: "" });
     setGuestSearch("");
     setPresenterSearch("");
     setShowModal(true);
@@ -104,6 +106,7 @@ export default function FacebookLiveAdmin() {
     setEditing(live);
     setForm({
       facebook_url: live.facebook_url,
+      topic: live.topic || "",
       guest_name: live.guest_name,
       guest_position: live.guest_position,
       guest_institution: live.guest_institution,
@@ -164,6 +167,7 @@ export default function FacebookLiveAdmin() {
   const filtered = lives.filter(
     (l) =>
       l.facebook_url.toLowerCase().includes(search.toLowerCase()) ||
+      l.topic.toLowerCase().includes(search.toLowerCase()) ||
       l.guest_name.toLowerCase().includes(search.toLowerCase()) ||
       l.presenter_name.toLowerCase().includes(search.toLowerCase())
   );
@@ -230,6 +234,7 @@ export default function FacebookLiveAdmin() {
               <tr className="bg-zinc-50 border-b border-zinc-200">
                 <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">#</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">Facebook URL</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">Topic</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">Guest</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">Position</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">Institution</th>
@@ -248,11 +253,14 @@ export default function FacebookLiveAdmin() {
                   style={{ animationDelay: `${i * 0.03}s` }}
                 >
                   <td className="px-5 py-4 text-sm text-zinc-400">{live.id}</td>
-                  <td className="px-5 py-4 max-w-[160px]">
+                  <td className="px-5 py-4 max-w-[140px]">
                     <a href={live.facebook_url} target="_blank" rel="noopener noreferrer"
                       className="text-sm text-[#1a4b8c] hover:underline truncate block">
-                      {live.facebook_url.length > 35 ? live.facebook_url.slice(0, 35) + "..." : live.facebook_url}
+                      {live.facebook_url.length > 30 ? live.facebook_url.slice(0, 30) + "..." : live.facebook_url}
                     </a>
+                  </td>
+                  <td className="px-5 py-4 max-w-[160px]">
+                    <span className="text-sm text-zinc-700 line-clamp-2">{live.topic || "—"}</span>
                   </td>
                   <td className="px-5 py-4 text-sm text-zinc-700">{live.guest_name || "—"}</td>
                   <td className="px-5 py-4 text-sm text-zinc-500">{live.guest_position || "—"}</td>
@@ -320,7 +328,7 @@ export default function FacebookLiveAdmin() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-5 py-12 text-center text-sm text-zinc-400">No lives found</td>
+                  <td colSpan={11} className="px-5 py-12 text-center text-sm text-zinc-400">No lives found</td>
                 </tr>
               )}
             </tbody>
@@ -342,6 +350,17 @@ export default function FacebookLiveAdmin() {
                   onChange={(e) => setForm({ ...form, facebook_url: e.target.value })}
                   className="w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-sm outline-none focus:border-[#1a4b8c] focus:ring-2 focus:ring-[#1a4b8c]/10 transition-all"
                   placeholder="https://www.facebook.com/watch/live/..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 mb-1">Topic of Discussion</label>
+                <input
+                  type="text"
+                  value={form.topic}
+                  onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                  className="w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-sm outline-none focus:border-[#1a4b8c] focus:ring-2 focus:ring-[#1a4b8c]/10 transition-all"
+                  placeholder="e.g. Climate Change and Its Impact on Agriculture"
                 />
               </div>
 
@@ -483,22 +502,28 @@ export default function FacebookLiveAdmin() {
               </div>
 
               {/* Details */}
-              <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-zinc-50 rounded-xl border border-zinc-200">
-                <div>
-                  <span className="text-xs font-semibold text-zinc-400 uppercase">Guest</span>
-                  <p className="text-sm font-medium text-zinc-800 mt-0.5">{preview.guest_name || "—"}</p>
+              <div className="mb-4 p-4 bg-zinc-50 rounded-xl border border-zinc-200">
+                <div className="mb-3">
+                  <span className="text-xs font-semibold text-zinc-400 uppercase">Topic</span>
+                  <p className="text-sm font-medium text-zinc-800 mt-0.5">{preview.topic || "—"}</p>
                 </div>
-                <div>
-                  <span className="text-xs font-semibold text-zinc-400 uppercase">Presenter</span>
-                  <p className="text-sm font-medium text-zinc-800 mt-0.5">{preview.presenter_name || "—"}</p>
-                </div>
-                <div>
-                  <span className="text-xs font-semibold text-zinc-400 uppercase">Position</span>
-                  <p className="text-sm text-zinc-600 mt-0.5">{preview.guest_position || "—"}</p>
-                </div>
-                <div>
-                  <span className="text-xs font-semibold text-zinc-400 uppercase">Institution</span>
-                  <p className="text-sm text-zinc-600 mt-0.5">{preview.guest_institution || "—"}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-xs font-semibold text-zinc-400 uppercase">Guest</span>
+                    <p className="text-sm font-medium text-zinc-800 mt-0.5">{preview.guest_name || "—"}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-zinc-400 uppercase">Presenter</span>
+                    <p className="text-sm font-medium text-zinc-800 mt-0.5">{preview.presenter_name || "—"}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-zinc-400 uppercase">Position</span>
+                    <p className="text-sm text-zinc-600 mt-0.5">{preview.guest_position || "—"}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-zinc-400 uppercase">Institution</span>
+                    <p className="text-sm text-zinc-600 mt-0.5">{preview.guest_institution || "—"}</p>
+                  </div>
                 </div>
               </div>
 

@@ -41,6 +41,7 @@ CREATE TABLE presenters (
 CREATE TABLE facebook_lives (
   id INT AUTO_INCREMENT PRIMARY KEY,
   facebook_url VARCHAR(500) NOT NULL,
+  topic TEXT,
   guest_name VARCHAR(255) DEFAULT '',
   guest_position VARCHAR(255) DEFAULT '',
   guest_institution VARCHAR(255) DEFAULT '',
