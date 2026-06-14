@@ -10,16 +10,22 @@ async function migrate() {
     process.exit(1);
   }
 
-  // Fix duplicate prefix and strip ssl-mode (mysql2 doesn't support it)
-  let cleanUrl = dbUrl.replace(/^mysql:/, ""); // remove accidental mysql: prefix
-  if (!cleanUrl.startsWith("mysql://")) cleanUrl = "mysql://" + cleanUrl;
-  cleanUrl = cleanUrl.replace(/\?ssl-mode=REQUIRED/, "");
-  console.log("Connecting to:", cleanUrl.replace(/\/\/.*@/, "//***@"));
+  // Parse URL manually
+  const cleaned = dbUrl.replace(/^mysql:/, "").replace(/\?ssl-mode=REQUIRED/, "");
+  const url = new URL(cleaned);
+
+  console.log("Connecting to:", url.host);
 
   const connection = await mysql.createConnection({
-    uri: cleanUrl,
+    host: url.hostname,
+    port: Number(url.port),
+    user: decodeURIComponent(url.username),
+    password: decodeURIComponent(url.password),
+    database: url.pathname.replace(/^\//, ""),
     ssl: {},
   });
+
+  console.log("Connected.\n");
 
   const sql = fs.readFileSync(
     path.join(__dirname, "..", "schema.sql"),
