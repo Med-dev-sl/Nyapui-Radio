@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
+    const formData: any = await request.formData();
     const file = formData.get("video") as File;
 
     if (!file) {
