@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/app/components/header";
+import Sidebar from "@/app/components/sidebar";
 
 type User = {
   id: number;
@@ -27,8 +28,14 @@ export default function AdminDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 flex flex-col">
       <Header user={user} />
+      <div className="flex flex-1">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          <h2 className="text-2xl font-bold text-zinc-800">Dashboard Overview</h2>
+        </main>
+      </div>
     </div>
   );
 }
