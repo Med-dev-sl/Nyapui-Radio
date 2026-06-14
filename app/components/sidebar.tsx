@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 
 type SidebarLink = {
   label: string;
-  icon: string;
+  icon?: string;
   href?: string;
-  children?: { label: string; href: string }[];
+  children?: SidebarLink[];
 };
 
 const links: SidebarLink[] = [
@@ -18,7 +18,13 @@ const links: SidebarLink[] = [
     icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z",
     children: [
       { label: "Application Users", href: "/admin/users/application" },
-      { label: "System Users", href: "/admin/users/system" },
+      {
+        label: "System Users",
+        children: [
+          { label: "Roles", href: "/admin/users/system/roles" },
+          { label: "System Admins", href: "/admin/users/system/admins" },
+        ],
+      },
     ],
   },
   { label: "Facebook Live", href: "/admin/facebook-live", icon: "M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3V2z" },
@@ -33,102 +39,138 @@ const links: SidebarLink[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [openUsers, setOpenUsers] = useState(false);
+  const [openSystem, setOpenSystem] = useState(false);
 
   const isUsersActive =
-    pathname === "/admin/users/application" || pathname === "/admin/users/system";
+    pathname.startsWith("/admin/users/application") ||
+    pathname.startsWith("/admin/users/system");
+
+  const isSystemActive =
+    pathname === "/admin/users/system/roles" ||
+    pathname === "/admin/users/system/admins";
+
+  function renderLink(link: SidebarLink, depth = 0) {
+    const indent = depth * 4;
+    const active = link.href ? pathname === link.href : false;
+
+    if (link.children) {
+      const isOpen = depth === 0 ? openUsers : openSystem;
+      const toggle = depth === 0
+        ? () => setOpenUsers(!openUsers)
+        : () => setOpenSystem(!openSystem);
+      const isActive = depth === 0 ? isUsersActive : isSystemActive;
+
+      return (
+        <div key={link.label}>
+          <button
+            onClick={toggle}
+            className={`group relative w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-[#1a4b8c] to-[#2563eb] text-white shadow-md"
+                : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 hover:shadow-sm"
+            }`}
+            style={{ paddingLeft: `${12 + indent}px` }}
+          >
+            {isActive && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+            )}
+            <span className="flex items-center gap-3">
+              {link.icon && (
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`transition-transform duration-200 group-hover:scale-110 ${
+                    isActive ? "text-white" : "text-zinc-400 group-hover:text-[#1a4b8c]"
+                  }`}
+                >
+                  <path d={link.icon} />
+                </svg>
+              )}
+              {link.label}
+            </span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-all duration-300 ${isOpen ? "rotate-180" : ""} ${
+                isActive ? "text-white/80" : "text-zinc-400"
+              }`}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {isOpen && (
+            <div className="ml-3 mt-1 flex flex-col gap-1 overflow-hidden animate-slide-down">
+              {link.children.map((child) => renderLink(child, depth + 1))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={link.href}
+        href={link.href!}
+        className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+          active
+            ? "bg-gradient-to-r from-[#1a4b8c] to-[#2563eb] text-white shadow-md"
+            : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 hover:shadow-sm hover:pl-4"
+        }`}
+        style={{ paddingLeft: `${12 + indent}px` }}
+      >
+        {active && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+        )}
+        {link.icon && (
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`transition-all duration-200 group-hover:scale-110 ${
+              active ? "text-white" : "text-zinc-400 group-hover:text-[#1a4b8c]"
+            }`}
+          >
+            <path d={link.icon} />
+          </svg>
+        )}
+        {link.label}
+      </Link>
+    );
+  }
 
   return (
     <aside className="w-64 bg-white border-r border-zinc-200 min-h-screen flex flex-col py-4 shadow-sm">
       <nav className="flex flex-col gap-1 px-3">
-        {links.map((link, i) => {
-          if (link.children) {
-            return (
-              <div key={link.label} className="animate-fade-slide-in" style={{ animationDelay: `${i * 0.05}s` }}>
-                <button
-                  onClick={() => setOpenUsers(!openUsers)}
-                  className={`group relative w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                    isUsersActive
-                      ? "bg-gradient-to-r from-[#1a4b8c] to-[#2563eb] text-white shadow-md"
-                      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 hover:shadow-sm"
-                  }`}
-                >
-                  {isUsersActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
-                  )}
-                  <span className="flex items-center gap-3">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className={`transition-transform duration-200 group-hover:scale-110 ${
-                        isUsersActive ? "text-white" : "text-zinc-400 group-hover:text-[#1a4b8c]"
-                      }`}
-                    >
-                      <path d={link.icon} />
-                    </svg>
-                    {link.label}
-                  </span>
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`transition-all duration-300 ${openUsers ? "rotate-180" : ""} ${
-                      isUsersActive ? "text-white/80" : "text-zinc-400"
-                    }`}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
-                {openUsers && (
-                  <div className="ml-6 mt-1 flex flex-col gap-1 overflow-hidden animate-slide-down">
-                    {link.children.map((child) => {
-                      const active = pathname === child.href;
-                      return (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          className={`relative rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
-                            active
-                              ? "bg-gradient-to-r from-[#1a4b8c] to-[#2563eb] text-white shadow-md"
-                              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 hover:pl-5"
-                          }`}
-                        >
-                          {active && (
-                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-white rounded-r-full" />
-                          )}
-                          {child.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          }
-
-          const active = pathname === link.href;
-          return (
+        {links.map((link) => link.children
+          ? renderLink(link, 0)
+          : (
             <Link
               key={link.href}
               href={link.href!}
               className={`animate-fade-slide-in group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                active
+                pathname === link.href
                   ? "bg-gradient-to-r from-[#1a4b8c] to-[#2563eb] text-white shadow-md"
                   : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 hover:shadow-sm hover:pl-4"
               }`}
-              style={{ animationDelay: `${i * 0.05}s` }}
             >
-              {active && (
+              {pathname === link.href && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
               )}
               <svg
@@ -141,15 +183,15 @@ export default function Sidebar() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className={`transition-all duration-200 group-hover:scale-110 ${
-                  active ? "text-white" : "text-zinc-400 group-hover:text-[#1a4b8c]"
+                  pathname === link.href ? "text-white" : "text-zinc-400 group-hover:text-[#1a4b8c]"
                 }`}
               >
                 <path d={link.icon!} />
               </svg>
               {link.label}
             </Link>
-          );
-        })}
+          )
+        )}
       </nav>
     </aside>
   );
