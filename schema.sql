@@ -42,13 +42,25 @@ CREATE TABLE facebook_lives (
   id INT AUTO_INCREMENT PRIMARY KEY,
   facebook_url VARCHAR(500) NOT NULL,
   topic TEXT,
-  guest_name VARCHAR(255) DEFAULT '',
-  guest_position VARCHAR(255) DEFAULT '',
-  guest_institution VARCHAR(255) DEFAULT '',
-  presenter_name VARCHAR(255) DEFAULT '',
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE live_guests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  live_id INT NOT NULL,
+  guest_id INT NOT NULL,
+  FOREIGN KEY (live_id) REFERENCES facebook_lives(id) ON DELETE CASCADE,
+  FOREIGN KEY (guest_id) REFERENCES guests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE live_presenters (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  live_id INT NOT NULL,
+  presenter_id INT NOT NULL,
+  FOREIGN KEY (live_id) REFERENCES facebook_lives(id) ON DELETE CASCADE,
+  FOREIGN KEY (presenter_id) REFERENCES presenters(id) ON DELETE CASCADE
 );
 
 CREATE TABLE live_likes (
