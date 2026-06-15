@@ -79,20 +79,11 @@ export default function PodcastAdmin() {
     e.preventDefault();
     if (!form.title) { show("Title is required", false); return; }
 
-    let audio_data = form.audio_data;
+    const body: Record<string, unknown> = { title: form.title, description: form.description || null };
 
-    if (audioFile && !editing) {
+    if (audioFile) {
       setConverting(true);
-      audio_data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error("Failed to read audio file"));
-        reader.readAsDataURL(audioFile);
-      });
-      setConverting(false);
-    } else if (audioFile && editing) {
-      setConverting(true);
-      audio_data = await new Promise<string>((resolve, reject) => {
+      body.audio_data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = () => reject(new Error("Failed to read audio file"));
@@ -100,8 +91,6 @@ export default function PodcastAdmin() {
       });
       setConverting(false);
     }
-
-    const body = { audio_data: audio_data || null, title: form.title, description: form.description || null };
 
     const url = editing ? `/api/podcasts/${editing.id}` : "/api/podcasts";
     const method = editing ? "PUT" : "POST";

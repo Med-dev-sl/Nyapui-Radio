@@ -7,10 +7,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     if (!title) return Response.json({ error: "Title is required" }, { status: 400 });
 
-    await db.execute(
-      "UPDATE podcasts SET audio_data = ?, title = ?, description = ? WHERE id = ?",
-      [audio_data || null, title, description || null, id]
-    );
+    const hasAudio = audio_data && audio_data.startsWith("data:");
+    const sql = hasAudio
+      ? "UPDATE podcasts SET audio_data = ?, title = ?, description = ? WHERE id = ?"
+      : "UPDATE podcasts SET title = ?, description = ? WHERE id = ?";
+    const params = hasAudio
+      ? [audio_data, title, description || null, id]
+      : [title, description || null, id];
+
+    await db.execute(sql, params);
 
     return Response.json({ success: true });
   } catch (e) {
