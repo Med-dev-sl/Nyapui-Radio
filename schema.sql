@@ -113,3 +113,30 @@ CREATE TABLE schedule_reminders (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (schedule_id) REFERENCES program_schedules(id) ON DELETE CASCADE
 );
+
+CREATE TABLE podcasts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  audio_data LONGTEXT,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE podcast_likes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  podcast_id INT NOT NULL,
+  session_id VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (podcast_id) REFERENCES podcasts(id) ON DELETE CASCADE
+);
+
+CREATE TABLE podcast_comments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  podcast_id INT NOT NULL,
+  commenter_name VARCHAR(255) DEFAULT 'Anonymous',
+  comment_text TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (podcast_id) REFERENCES podcasts(id) ON DELETE CASCADE
+);

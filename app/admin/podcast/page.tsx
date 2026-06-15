@@ -1,4 +1,5 @@
-export default function PodcastPage() { return <Placeholder title="Podcast" />; }
-function Placeholder({ title }: { title: string }) {
-  return <div className="p-6 animate-fade-slide-in"><div className="flex items-center justify-center py-20 text-zinc-400 text-sm">Coming soon</div></div>;
+import PodcastAdmin from "@/app/components/podcast-admin";
+
+export default function PodcastPage() {
+  return <PodcastAdmin />;
 }
