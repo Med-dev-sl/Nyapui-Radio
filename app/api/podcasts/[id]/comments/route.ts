@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const id: string = (await params).id;
     const [rows] = await db.execute(
       "SELECT id, commenter_name, comment_text, created_at FROM podcast_comments WHERE podcast_id = ? ORDER BY created_at DESC",
       [id]
@@ -15,7 +15,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const id: string = (await params).id;
     const { commenter_name, comment_text } = await request.json();
 
     if (!comment_text) return Response.json({ error: "Comment text is required" }, { status: 400 });

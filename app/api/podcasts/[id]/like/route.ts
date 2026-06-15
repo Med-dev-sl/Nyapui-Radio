@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const id: string = (await params).id;
     const [rows]: any = await db.execute("SELECT COUNT(*) AS count FROM podcast_likes WHERE podcast_id = ?", [id]);
     return Response.json({ count: rows[0].count });
   } catch (e) {
@@ -12,7 +12,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const id: string = (await params).id;
     const { session_id } = await request.json();
 
     const [existing]: any = await db.execute("SELECT id FROM podcast_likes WHERE podcast_id = ? AND session_id = ?", [id, session_id]);
