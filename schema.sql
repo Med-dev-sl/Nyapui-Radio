@@ -82,7 +82,7 @@ CREATE TABLE live_comments (
 
 CREATE TABLE program_schedules (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  photo_url VARCHAR(500) DEFAULT '',
+  photo_url LONGTEXT,
   scheduled_at DATETIME NOT NULL,
   topic TEXT,
   is_active BOOLEAN DEFAULT TRUE,
